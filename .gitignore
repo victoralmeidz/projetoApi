@@ -1,0 +1,10 @@
+node_modules/
+dist/
+
+.env
+
+# Java/Quarkus
+worker/target/
+
+# Sistema
+.DS_Store
