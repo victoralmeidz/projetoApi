@@ -6,5 +6,4 @@ dist/
 # Java/Quarkus
 worker/target/
 
-# Sistema
 .DS_Store
