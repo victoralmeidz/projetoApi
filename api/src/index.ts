@@ -1,12 +1,14 @@
 import Fastify from 'fastify'
 import dotenv from 'dotenv'
 import conexaoBanco from './db/conexao'
+import rotasPedidos from './rotas/pedidos'
 
 dotenv.config()
 
 const app = Fastify({ logger: true })
 
 app.register(conexaoBanco)
+app.register(rotasPedidos)
 
 const PORT = Number(process.env.PORT) || 3000
 
