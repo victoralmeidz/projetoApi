@@ -30,7 +30,7 @@ public class ProcessadorPedidos {
 
         String atualizar = """
             UPDATE pedidos SET status = 'confirmed'
-            WHERE id = ?
+            WHERE id = ?::uuid
         """;
 
         try (Connection conn = dataSource.getConnection()) {

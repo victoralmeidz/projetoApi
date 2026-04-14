@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import dotenv from 'dotenv'
+import cors from '@fastify/cors'
 import conexaoBanco from './db/conexao'
 import rotasPedidos from './rotas/pedidos'
 import { handlerErros } from './erros'
@@ -8,6 +9,10 @@ dotenv.config()
 
 const app = Fastify({ logger: true })
 
+app.register(cors, {
+  origin: '*',
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS']
+})
 app.register(conexaoBanco)
 app.register(rotasPedidos)
 app.setErrorHandler(handlerErros)

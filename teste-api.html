@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel de Testes — API de Pedidos</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f5; color: #1a1a1a; padding: 2rem; }
+    h1 { font-size: 22px; font-weight: 500; margin-bottom: 1.5rem; }
+    h3 { font-size: 12px; font-weight: 500; color: #888; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 12px; }
+    .row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; flex-wrap: wrap; }
+    input, select { height: 36px; border: 1px solid #ddd; border-radius: 8px; padding: 0 10px; font-size: 14px; color: #1a1a1a; background: #fff; flex: 1; min-width: 120px; outline: none; }
+    input:focus, select:focus { border-color: #888; }
+    button { height: 36px; padding: 0 16px; border: 1px solid #ddd; border-radius: 8px; background: #fff; font-size: 14px; cursor: pointer; white-space: nowrap; }
+    button:hover { background: #f5f5f5; }
+    button:active { transform: scale(0.98); }
+    .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; }
+    .badge-post { background: #dbeafe; color: #1d4ed8; }
+    .badge-get { background: #dcfce7; color: #15803d; }
+    .badge-patch { background: #fef3c7; color: #92400e; }
+    .result { background: #f8f8f8; border-radius: 8px; padding: 10px; font-family: monospace; font-size: 12px; white-space: pre-wrap; word-break: break-all; margin-top: 8px; max-height: 200px; overflow-y: auto; display: none; border: 1px solid #e5e5e5; }
+    .status-ok { color: #15803d; font-weight: 500; font-size: 12px; }
+    .status-err { color: #dc2626; font-weight: 500; font-size: 12px; }
+    .label { font-size: 13px; color: #888; white-space: nowrap; }
+    .danger-card { border-color: #fca5a5; }
+    .url-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 1.5rem; background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 0.75rem 1.25rem; }
+    .url-bar label { font-size: 13px; color: #888; white-space: nowrap; }
+    .url-bar input { border: 1px solid #ddd; }
+    .rota-title { font-size: 14px; font-weight: 500; }
+    .rota-desc { font-size: 13px; color: #888; margin-left: auto; }
+  </style>
+</head>
+<body>
+
+  <h1>Painel de testes — API de Pedidos</h1>
+
+  <div class="url-bar">
+    <label>Base URL:</label>
+    <input id="baseUrl" value="http://localhost:3000" style="max-width: 280px;" />
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <span class="badge badge-post">POST</span>
+      <span class="rota-title">/orders</span>
+      <span class="rota-desc">Criar pedido</span>
+    </div>
+    <div class="row">
+      <input id="customerName" placeholder="Nome do cliente" />
+    </div>
+    <div class="row">
+      <input id="product" placeholder="Produto" />
+      <input id="qty" type="number" placeholder="Qtd" style="max-width: 70px;" value="1" />
+      <input id="price" type="number" placeholder="Preço unit." style="max-width: 110px;" value="100" />
+    </div>
+    <div class="row">
+      <button onclick="criarPedido()">Criar pedido ↗</button>
+      <span id="statusCriar"></span>
+    </div>
+    <div class="result" id="resCriar"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <span class="badge badge-get">GET</span>
+      <span class="rota-title">/orders</span>
+      <span class="rota-desc">Listar pedidos</span>
+    </div>
+    <div class="row">
+      <span class="label">Página:</span>
+      <input id="page" type="number" value="1" style="max-width: 60px;" />
+      <span class="label">Limite:</span>
+      <input id="limit" type="number" value="10" style="max-width: 60px;" />
+      <button onclick="listarPedidos()">Listar ↗</button>
+      <span id="statusListar"></span>
+    </div>
+    <div class="result" id="resListar"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <span class="badge badge-get">GET</span>
+      <span class="rota-title">/orders/:id</span>
+      <span class="rota-desc">Detalhar pedido</span>
+    </div>
+    <div class="row">
+      <input id="idDetalhar" placeholder="ID do pedido" />
+      <button onclick="detalharPedido()">Buscar ↗</button>
+      <span id="statusDetalhar"></span>
+    </div>
+    <div class="result" id="resDetalhar"></div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <span class="badge badge-patch">PATCH</span>
+      <span class="rota-title">/orders/:id/status</span>
+      <span class="rota-desc">Atualizar status</span>
+    </div>
+    <div class="row">
+      <input id="idStatus" placeholder="ID do pedido" />
+      <select id="novoStatus" style="max-width: 140px; flex: none;">
+        <option value="confirmed">confirmed</option>
+        <option value="cancelled">cancelled</option>
+        <option value="pending">pending</option>
+      </select>
+      <button onclick="atualizarStatus()">Atualizar ↗</button>
+      <span id="statusAtualizar"></span>
+    </div>
+    <div class="result" id="resAtualizar"></div>
+  </div>
+
+  <div class="card danger-card">
+    <h3>Teste de validação</h3>
+    <p style="font-size: 13px; color: #888; margin-bottom: 8px;">Envia um pedido inválido (sem customer_name) — deve retornar erro 400</p>
+    <div class="row">
+      <button onclick="testarValidacao()">Testar validação ↗</button>
+      <span id="statusValidacao"></span>
+    </div>
+    <div class="result" id="resValidacao"></div>
+  </div>
+
+  <script>
+    function base() {
+      return document.getElementById('baseUrl').value.replace(/\/$/, '')
+    }
+
+    function mostrar(resultId, statusId, data, httpStatus) {
+      const el = document.getElementById(resultId)
+      el.style.display = 'block'
+      el.textContent = JSON.stringify(data, null, 2)
+      const s = document.getElementById(statusId)
+      const ok = httpStatus >= 200 && httpStatus < 300
+      s.className = ok ? 'status-ok' : 'status-err'
+      s.textContent = 'HTTP ' + httpStatus
+    }
+
+    function erro(statusId, msg) {
+      const s = document.getElementById(statusId)
+      s.className = 'status-err'
+      s.textContent = msg
+    }
+
+    async function criarPedido() {
+      const nome = document.getElementById('customerName').value
+      const product = document.getElementById('product').value
+      const qty = Number(document.getElementById('qty').value)
+      const price = Number(document.getElementById('price').value)
+      try {
+        const r = await fetch(base() + '/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer_name: nome, items: [{ product, quantity: qty, unit_price: price }] })
+        })
+        const data = await r.json()
+        mostrar('resCriar', 'statusCriar', data, r.status)
+        if (r.ok) {
+          document.getElementById('idDetalhar').value = data.id
+          document.getElementById('idStatus').value = data.id
+        }
+      } catch(e) {
+        erro('statusCriar', 'API offline?')
+      }
+    }
+
+    async function listarPedidos() {
+      const page = document.getElementById('page').value
+      const limit = document.getElementById('limit').value
+      try {
+        const r = await fetch(base() + '/orders?page=' + page + '&limit=' + limit)
+        const data = await r.json()
+        mostrar('resListar', 'statusListar', data, r.status)
+      } catch(e) {
+        erro('statusListar', 'API offline?')
+      }
+    }
+
+    async function detalharPedido() {
+      const id = document.getElementById('idDetalhar').value
+      try {
+        const r = await fetch(base() + '/orders/' + id)
+        const data = await r.json()
+        mostrar('resDetalhar', 'statusDetalhar', data, r.status)
+      } catch(e) {
+        erro('statusDetalhar', 'API offline?')
+      }
+    }
+
+    async function atualizarStatus() {
+      const id = document.getElementById('idStatus').value
+      const status = document.getElementById('novoStatus').value
+      try {
+        const r = await fetch(base() + '/orders/' + id + '/status', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status })
+        })
+        const data = await r.json()
+        mostrar('resAtualizar', 'statusAtualizar', data, r.status)
+      } catch(e) {
+        erro('statusAtualizar', 'API offline?')
+      }
+    }
+
+    async function testarValidacao() {
+      try {
+        const r = await fetch(base() + '/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: [] })
+        })
+        const data = await r.json()
+        mostrar('resValidacao', 'statusValidacao', data, r.status)
+      } catch(e) {
+        erro('statusValidacao', 'API offline?')
+      }
+    }
+  </script>
+
+</body>
+</html>
